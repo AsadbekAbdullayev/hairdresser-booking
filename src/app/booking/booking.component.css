@@ -1,0 +1,8 @@
+button {
+  transition: all 0.3s ease-in-out;
+}
+.container {
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  padding: 20px;
+}
