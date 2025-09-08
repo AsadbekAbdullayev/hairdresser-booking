@@ -16,12 +16,7 @@
     Book an Appointment
   </h1>
 
-  <nz-table
-    #basicTable
-    [nzBordered]="true"
-    nzTemplateMode
-    class="shadow-lg rounded-lg"
-  >
+  <nz-table #basicTable [nzBordered]="true" nzTemplateMode class="shadow-lg rounded-lg">
     <thead>
       <tr>
         <th class="text-lg">Days</th>
@@ -30,31 +25,29 @@
     </thead>
     <tbody>
       <tr *ngFor="let day of schedule">
-        <td class="font-semibold !underline !text-blue-700">{{ day.day }}</td>
-        <td class="w-fit flex gap-4">
-          <div style="display: flex; flex-wrap: wrap; gap: 12px">
-            <button
-              *ngFor="let hour of day.hours"
-              [disabled]="isBooked(day.day, hour)"
-              (click)="bookSlot(day.day, hour)"
-              nz-button
-              nz-tooltip
-              [nzTooltipTitle]="
-                isBooked(day.day, hour)
-                  ? 'Booked by ' + getBookedUser(day.day, hour)
-                  : ''
-              "
-              nzType="primary"
-              class="w-fit px-4 py-2 rounded mx-2"
-              [ngClass]="
-                isBooked(day.day, hour)
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              "
-            >
-              {{ hour }}
-            </button>
-          </div>
+        <td class="font-semibold underline text-blue-700">{{ day.day }}</td>
+        <td class="w-fit flex flex-wrap gap-3">
+          <button
+            *ngFor="let hour of day.hours"
+            [disabled]="isBooked(day.day, hour)"
+            (click)="bookSlot(day.day, hour)"
+            nz-button
+            nz-tooltip
+            [nzTooltipTitle]="
+              isBooked(day.day, hour)
+                ? 'Booked by ' + getBookedUser(day.day, hour)
+                : ''
+            "
+            nzType="primary"
+            class="w-fit px-4 py-2 rounded mx-2"
+            [ngClass]="
+              isBooked(day.day, hour)
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
+            "
+          >
+            {{ hour }}
+          </button>
         </td>
       </tr>
     </tbody>
