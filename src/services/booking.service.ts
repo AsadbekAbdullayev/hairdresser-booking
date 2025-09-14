@@ -1,57 +1,85 @@
 import { Injectable } from '@angular/core';
 
+export interface BookedSlot {
+  day: string;
+  time: string;
+}
+
+export interface DaySlots {
+  day: string;
+  times: { time: string; booked: boolean }[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class BookingService {
-  private storageKey = 'bookedSlots';
+  private readonly storageKey = 'bookedSlots';
+  private readonly days = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
-  constructor() {}
-
-  // Generate time slots for 1 week (Monday - Sunday, 9 AM - 5 PM)
-  getAvailableSlots(): {
-    day: string;
-    times: { time: string; booked: boolean }[];
-  }[] {
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
+  // Generate slots for 1 week (9 AM - 5 PM)
+  getAvailableSlots(): DaySlots[] {
     const bookedSlots = this.getBookedSlots();
-    const slots: { day: string; times: { time: string; booked: boolean }[] }[] =
-      [];
 
-    days.forEach((day) => {
-      const times = [];
-      for (let hour = 9; hour <= 17; hour++) {
+    return this.days.map((day) => {
+      const times = Array.from({ length: 9 }, (_, i) => {
+        const hour = 9 + i;
         const timeSlot = `${hour}:00`;
-        times.push({
+
+        return {
           time: timeSlot,
           booked: bookedSlots.some(
             (slot) => slot.day === day && slot.time === timeSlot
           ),
-        });
-      }
-      slots.push({ day, times });
+        };
+      });
+
+      return { day, times };
     });
-
-    return slots;
   }
 
-  // Get booked slots from localStorage
-  getBookedSlots(): { day: string; time: string }[] {
-    return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+  // Read booked slots from localStorage
+  getBookedSlots(): BookedSlot[] {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? (JSON.parse(stored) as BookedSlot[]) : [];
+    } catch {
+      return [];
+    }
   }
 
-  // Book a time slot and save to localStorage
+  // Save slots safely
+  private saveSlots(slots: BookedSlot[]): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(slots));
+  }
+
+  // Book a slot
   bookSlot(day: string, time: string): void {
     const bookedSlots = this.getBookedSlots();
-    bookedSlots.push({ day, time });
-    localStorage.setItem(this.storageKey, JSON.stringify(bookedSlots));
+
+    if (!bookedSlots.some((slot) => slot.day === day && slot.time === time)) {
+      this.saveSlots([...bookedSlots, { day, time }]);
+    }
+  }
+
+  // Cancel booking
+  unbookSlot(day: string, time: string): void {
+    const updated = this.getBookedSlots().filter(
+      (slot) => !(slot.day === day && slot.time === time)
+    );
+    this.saveSlots(updated);
+  }
+
+  // Clear all slots
+  clearAll(): void {
+    localStorage.removeItem(this.storageKey);
   }
 }
